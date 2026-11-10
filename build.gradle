@@ -115,6 +115,20 @@ repositories {
     // Put repositories for dependencies here
     // ForgeGradle automatically adds the Forge maven and Maven Central for you
 
+    // AE2 官方坐标（appeng:appliedenergistics2-forge），modmaven 上带完整 POM
+    maven {
+        name = 'ModMaven'
+        url = 'https://modmaven.dev'
+        content { includeGroup 'appeng' }
+    }
+
+    // 软依赖（Jade）走 Modrinth 的 maven 镜像：无鉴权、坐标形如 maven.modrinth:jade:<version>
+    maven {
+        name = 'Modrinth'
+        url = 'https://api.modrinth.com/maven'
+        content { includeGroup 'maven.modrinth' }
+    }
+
     // If you have mod jar dependencies in ./libs, you can declare them as a repository like so.
     // See https://docs.gradle.org/current/userguide/declaring_repositories.html#sub:flat_dir_resolver
     // flatDir {
@@ -129,6 +143,19 @@ dependencies {
     // If the group id is "net.minecraft" and the artifact id is one of ["client", "server", "joined"],
     // then special handling is done to allow a setup of a vanilla dependency without the use of an external repository.
     minecraft "net.minecraftforge:forge:${minecraft_version}-${forge_version}"
+
+    // ---- 硬依赖：AE2 ----
+    // fg.deobf 把发布 jar 的 SRG 名重映射回本项目映射；不做这一步，注入点与 API 调用都对不上。
+    implementation fg.deobf("appeng:appliedenergistics2-forge:${ae2_version}")
+
+    // ---- 软依赖：Jade（显示）----
+    // compileOnly + runtimeOnly：编译期能写插件，运行期仅开发环境需要；玩家侧缺失时静默降级。
+    compileOnly fg.deobf("maven.modrinth:jade:${jade_version}")
+    runtimeOnly fg.deobf("maven.modrinth:jade:${jade_version}")
+
+    // ---- 软依赖：GTMThings（覆盖板兼容）----
+    // 刻意不加坐标：其覆盖板 API 无公开资料，本项目改用反射探测（见 DESIGN §8）。
+    // 需要实机联调时把对应 jar 放进 run/mods，不进依赖声明。
 
     // Example mod dependency with JEI - using fg.deobf() ensures the dependency is remapped to your development mappings
     // The JEI API is declared for compile time use, while the full JEI artifact is used at runtime
@@ -157,6 +184,7 @@ tasks.named('processResources', ProcessResources).configure {
             loader_version_range: loader_version_range,
             mod_id: mod_id, mod_name: mod_name, mod_license: mod_license, mod_version: mod_version,
             mod_authors: mod_authors, mod_description: mod_description,
+            ae2_version_range: ae2_version_range,
     ]
     inputs.properties replaceProperties
 

@@ -66,6 +66,30 @@ description='''${mod_description}'''
     ordering="NONE"
     side="BOTH"
 
+# ---- 硬依赖：AE2（合成旁路的接入点与网格节点都在它里面）----
+[[dependencies.${mod_id}]]
+    modId="ae2"
+    mandatory=true
+    versionRange="${ae2_version_range}"
+    ordering="AFTER"
+    side="BOTH"
+
+# ---- 软依赖：Jade（信息显示；缺失时静默降级，不影响加载）----
+[[dependencies.${mod_id}]]
+    modId="jade"
+    mandatory=false
+    versionRange="[11.0.0,)"
+    ordering="AFTER"
+    side="BOTH"
+
+# ---- 软依赖：GTMThings（无线能源覆盖板兼容；缺失时整块兼容逻辑跳过）----
+[[dependencies.${mod_id}]]
+    modId="gtmthings"
+    mandatory=false
+    versionRange="[0,)"
+    ordering="AFTER"
+    side="BOTH"
+
 # Features are specific properties of the game environment, that you may want to declare you require. This example declares
 # that your mod requires GL version 3.2 or higher. Other features will be added. They are side aware so declaring this won't
 # stop your mod loading on the server for example.

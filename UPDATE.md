@@ -29,6 +29,50 @@
 
 ---
 
+## 2026-11-10 · 依赖接入：AE2 15.4.10 与 Jade 11.13.3 通道打通，mods.toml 声明三方依赖，附录锚点对产物核对
+
+| 项 | 内容 |
+|----|------|
+| 变更类型 | 新增（构建基建；Wave 0） |
+| 涉及范围 | 构建脚本仓库与依赖、版本属性、元数据依赖声明、设计方案附录 A/B 与实施路线 |
+| 是否可回滚 | 是（移除仓库与三条依赖即可回到纯骨架） |
+| 已知风险 | AE2 版本被钉死在 15.4.10；`mods.toml` 声明 `ae2` 为硬依赖后，无 AE2 的环境将拒绝加载（符合设计） |
+
+### 效果
+
+- 工程现在**真的能引用 AE2 与 Jade 的类型**：编译期有 AE2 全量 API 与 Jade 插件接口，运行期只额外带 Jade。
+- 玩家侧安装约束由元数据表达：没有 AE2 就不加载；没有 Jade 或 GTMThings 照常加载，功能各自降级。
+- DESIGN 附录里三条「待核」项被实测销号，实现阶段不必再猜 API 形状。
+
+### 实现
+
+- AE2 走 `modmaven.dev`（官方坐标、带完整 POM），坐标 `appeng:appliedenergistics2-forge:15.4.10`，经 `fg.deobf` 重映射到本项目映射。
+- Jade 走 Modrinth 的 maven 镜像（无鉴权），坐标 `maven.modrinth:jade:11.13.3+forge`；`compileOnly` + `runtimeOnly`，玩家缺失时静默降级。
+- **GTMThings 刻意不引入坐标**：其覆盖板 API 无公开资料，本项目用反射探测（DESIGN §8.2）；实机联调时把 jar 放进 `run/mods`，避免为了一个不确定的 API 绑定一个不确定的版本。
+- 两个仓库都用 `content { includeGroup ... }` 限定组，避免把无关构件从第三方仓库解析。
+- 版本属性集中在 `gradle.properties`（`ae2_version`、`ae2_version_range`、`jade_version`），元数据里的 AE2 版本范围经 `processResources` 展开，不在 `mods.toml` 里写死。
+
+### 边界
+
+- 依赖只有一个**可用**版本被验证（15.4.10）；同系列其它版本未试，升级时按 AGENTS §2 走确认。
+- Jade 只验证了「能解析」；插件接口的实际使用属 Wave 5。
+- 未引入 Access Transformer，也未引入任何 Mixin 基础设施（仍是 Wave 3）。
+
+### 验证
+
+- `verify: 依赖解析 | .\gradlew.bat dependencies --configuration compileClasspath | exit=0 | 命中: appeng:appliedenergistics2-forge:15.4.10_mapped_official_1.20.1、maven.modrinth:jade:11.13.3+forge_mapped_official_1.20.1`
+- `verify: 重映射产物 | 缓存目录 | 命中: deobf_dependencies/appeng/appliedenergistics2-forge/15.4.10_mapped_official_1.20.1/…jar 存在`
+- `verify: T0 | javap -p -classpath <AE2 产物> appeng.api.networking.crafting.ICraftingService | exit=0 | 命中: beginCraftingCalculation(Level, ICraftingSimulationRequester, AEKey, long, CalculationStrategy) → Future<ICraftingPlan>；submitJob(ICraftingPlan, ICraftingRequester, ICraftingCPU, boolean, IActionSource) → ICraftingSubmitResult（描述符内零 MC 类型）`
+- `verify: T0 | javap -p appeng.api.networking.IGrid | 命中: public abstract <T> Set<T> getMachines(Class<T>)`
+- `verify: T0 | javap -p appeng.me.helpers.IGridConnectedBlockEntity | 命中: abstract getMainNode() / saveChanges()；default getGridConnectableSides(BlockOrientation)`
+- `verify: T0 | javap -p appeng.blockentity.AEBaseInvBlockEntity | 命中: abstract getInternalInventory() / onChangeInventory(InternalInventory,int)`
+- `verify: T0 | javap -p appeng.crafting.CraftingPlan | 命中: final class … extends Record implements ICraftingPlan，8 个分量与规范构造器`
+- `verify: 构建 | .\gradlew.bat build | exit=0 | BUILD SUCCESSFUL in 10s（7 actionable tasks）`
+- `verify: T0 | unzip -p build\libs\*.jar META-INF/mods.toml | 命中: modId="ae2" mandatory=true、modId="jade" mandatory=false、modId="gtmthings" mandatory=false`
+- **未实机验证**（T2/T3）：无方块、无可加载内容，`runServer` 冒烟无意义；人工测点留到 Wave 1。
+
+---
+
 ## 2026-11-10 · 修正：模组描述中文乱码；订正协作者规范里的 Mixin 口径
 
 | 项 | 内容 |

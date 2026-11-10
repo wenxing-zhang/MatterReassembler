@@ -32,7 +32,8 @@
 | MDK 示例文件**已删除** | `src\main\java\com\example\examplemod\` 下 `ExampleMod.java`、`Config.java` 均已移除，`com\example\` 目录不剩 |
 | 主类骨架**已建立** | `src\main\java\com\wenxing\matterreassembler\MatterReassembler.java`：`@Mod(MODID)` + 日志 + 两条 `DeferredRegister`（方块、物品），**零 AE2 引用**（依赖未接入前不阻塞编译） |
 | 元数据**已改名** | `gradle.properties`：`mod_id=matterreassembler`、`mod_name=Matter Reassembler`、`mod_group_id=com.wenxing.matterreassembler`、`mod_authors=wenxing` |
-| **尚未接入 AE2 / Jade / GTMThings 依赖** | `build.gradle` 依赖块内无相关条目；本地 Gradle 缓存亦无 AE2 产物 |
+| **依赖已接入**（2026-11-10） | `build.gradle`：`appeng:appliedenergistics2-forge:15.4.10`（modmaven.dev，硬依赖）+ `maven.modrinth:jade:11.13.3+forge`（compileOnly/runtimeOnly，软依赖）；GTMThings **刻意不加坐标**（走反射，见 DESIGN §8） |
+| 元数据依赖已声明 | `mods.toml` 内 `ae2` mandatory=true（`[15.4.0,16)`）、`jade`/`gtmthings` mandatory=false；已核对产物内取值 |
 | git 仓库**已初始化** | 主分支 `MatterReassembler-Forge-1.20.1`；远程 `origin` 为 SSH（HTTPS 在本机 443 不通，见 R8） |
 | 无测试目录 | 只有 `src/main/`，没有 `src/test/`；T1 探针一律放 `.rivet/scratch/` |
 | 无任何资源文件 | 缺 `blockstates`/`models`/`textures`/`lang`/`recipes`，Wave 1 一次性补齐 |

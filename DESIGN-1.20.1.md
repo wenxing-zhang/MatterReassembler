@@ -342,6 +342,11 @@ T3 占比 5/17 ≈ 29%，未过半，设计门禁通过。**改动任何一条 T
 
 ### Wave 0 · 基建与签名核对（不写业务逻辑）
 
+> **完成情况（2026-11-10）**：1–6 全部落地。依赖实测可用——`compileClasspath` 解析出
+> `appeng:appliedenergistics2-forge:15.4.10_mapped_official_1.20.1` 与
+> `maven.modrinth:jade:11.13.3+forge_mapped_official_1.20.1`；GTMThings **未引入坐标**（反射方案，见 §8.2）；
+> 附录 A 锚点已用 `javap` 对实际产物核对（B-1/B-2/B-3 销号）。
+
 1. 改 `gradle.properties`：`mod_id=matterreassembler`、`mod_name=Matter Reassembler`、`mod_group_id=com.wenxing.matterreassembler`、版本字段。
 2. 接入依赖：AE2 15.4.x（硬）、Jade（软，`compileOnly` + `runtimeOnly`）、GTMThings（软，`compileOnly` + `runtimeOnly`）。坐标与可达性见附录 B-2。
 3. 包名迁移 `com.example.examplemod` → `com.wenxing.matterreassembler`，删模板示例注册项（保留 `Config` 骨架）。
@@ -401,7 +406,9 @@ T3 占比 5/17 ≈ 29%，未过半，设计门禁通过。**改动任何一条 T
 
 ## 附录 A · 外部契约锚点（签名核对用，非行为证据）
 
-来源：AE2 `AppliedEnergistics/Applied-Energistics-2` 分支 `forge/1.20.1`；Jade `Snownee/Jade` 分支 `1.20-forge`。抓取时间 2026-11-10。行号为该快照内的行号，Wave 0 须以 `javap` 复核对**本项目实际依赖版本**的产物。
+来源：AE2 `AppliedEnergistics/Applied-Energistics-2` 分支 `forge/1.20.1`；Jade `Snownee/Jade` 分支 `1.20-forge`。抓取时间 2026-11-10。
+
+**已用实际依赖产物复核**（T0）：对 `appliedenergistics2-forge-15.4.10_mapped_official_1.20.1.jar` 执行 `javap -p`，本表和下列条目全部吻合——唯一的修正是接口包名：`IGridConnectedBlockEntity` 实际在 `appeng.me.helpers`（不是 `appeng.api.networking`）。
 
 ### A.1 AE2
 
@@ -438,11 +445,11 @@ T3 占比 5/17 ≈ 29%，未过半，设计门禁通过。**改动任何一条 T
 
 | 编号 | 事项 | 处置 |
 |------|------|------|
-| B-1 | `IGrid#getMachines(Class<T>)` 的准确签名与返回类型（用于枚举网格内本方块实体） | Wave 0 `javap` 核对；若不存在，改为遍历 `IGrid.getNodes()` 过滤 host 类型 |
-| B-2 | AE2 15.4.x 与本项目可用的 Maven 来源：GitHub Packages 需凭据；CurseMaven 需固定 fileId | Wave 0 先试无凭据来源（CurseMaven / 公开 maven），失败一次即按 AGENTS §5 上报，不连续试第三种 |
-| B-3 | `AENetworkInvBlockEntity` 是否强制实现 `getGridConnectableSides` / `getItemFromBlockEntity` / `onChangeInventory` | Wave 0 读实际依赖版本的类（`javap -p` 看 abstract 方法） |
+| B-1 | `IGrid#getMachines(Class<T>)` 的准确签名与返回类型 | **已销号（2026-11-10 T0）**：`public abstract <T> Set<T> getMachines(Class<T>)`，直接可用 |
+| B-2 | AE2 15.4.x 与本项目可用的 Maven 来源 | **已销号（2026-11-10）**：`https://modmaven.dev` → `appeng:appliedenergistics2-forge:15.4.10`（带完整 POM，`fg.deobf` 正常重映射）。Jade 走 `https://api.modrinth.com/maven` → `maven.modrinth:jade:11.13.3+forge` |
+| B-3 | `AENetworkInvBlockEntity` 的强制实现面 | **已销号（2026-11-10 T0）**：基类自身抽象成员来自 `AEBaseInvBlockEntity`（`getInternalInventory()`、`onChangeInventory(InternalInventory,int)`），接口 `appeng.me.helpers.IGridConnectedBlockEntity` 强制 `getMainNode()` 与 `saveChanges()`；`getGridConnectableSides(BlockOrientation)` 是 **default**，按需覆写即可 |
 | B-4 | 节点是否设 `REQUIRE_CHANNEL`（默认不设：本方块不占频道） | Wave 1 定稿并写进 `UPDATE.md` |
-| B-5 | GTMThings 覆盖板 API 类名/字段/推送方式（公开资料缺失） | Wave 4 反射探测 + 占位；**不得虚构类名** |
+| B-5 | GTMThings 覆盖板 API 类名/字段/推送方式（公开资料缺失） | Wave 4 反射探测 + 占位；**不得虚构类名**。**已定（2026-11-10）**：因此**不引入 GTMThings 依赖坐标**，联调时把 jar 丢进 `run/mods` |
 | B-6 | `CraftConfirmMenu` 对「成功但无链接」的客户端处理（是否会报错或残留待确认状态） | Wave 3 读该方法 266 行之后的处理逻辑 + T3 测点 1 |
 | B-7 | 计费口径最终形态 | **已定（2026-11-10）：按次 `PER_JOB`**；`PER_UNIT` 保留为配置项 |
 | B-8 | 底面是否允许安装 GTMThings 覆盖板 | Wave 4 实机确认；不支持则该边界自动消失 |
