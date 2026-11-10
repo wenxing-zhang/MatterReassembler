@@ -19,7 +19,7 @@
 | 构建系统 | ForgeGradle |
 | 硬依赖 | **AE2 15.4.x**（Forge 分支） |
 | 软依赖 | Jade 11.x（显示）；GTMThings（覆盖板兼容，`compileOnly` + `runtimeOnly`） |
-| Mixin | **有**（仅合成接管一处，最小面）；无 Access Transformer |
+| Mixin | **计划有**（仅合成接管一处，最小面）——基础设施**尚未接入**：`build.gradle` 内 `mixin` 配置 0 处、仓库内无 `mixins.json`（2026-11-10 实测）；无 Access Transformer |
 | 包名 | `com.wenxing.matterreassembler`（改动须全链同步：`build.gradle`、`mods.toml`、`pack.mcmeta` 无关） |
 | 数据路径风格 | 1.20 复数：`recipes/`、`loot_tables/`、`blockstates/`、`models/`、`lang/` |
 | 设计文档 | `DESIGN-1.20.1.md`（单文件，语义真源） |
@@ -81,6 +81,7 @@
 | 软依赖（GTMThings / Jade） | 缺失时**不加载**兼容类（`ModList.get().isLoaded` 门 + 独立类）；反射失败降级为 warn，不抛 |
 | 配方与语言 | `recipes/` 复数路径、`lang/en_us.json` + `lang/zh_cn.json` 键全覆盖 |
 | 配置 | `ForgeConfigSpec` 键名稳定；默认值变更写进 `UPDATE.md` |
+| 构建属性 / 元数据 | **`gradle.properties` 里不得直接写非 ASCII**：Gradle 以 ISO-8859-1 读取，中文会经 `processResources` 的 `expand` 变成双重编码（源 `e9 99 84` → 产物 `c3 a9 c2 99`）。中文一律写成 `\uXXXX`，并在 `unzip -p <jar> META-INF/mods.toml` 里核对字节而不是只看终端 |
 
 #### 3.1.1 Mixin 与 AE2 类名的特殊规则（本仓库高频踩点）
 
