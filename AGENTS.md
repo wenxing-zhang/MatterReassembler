@@ -212,7 +212,7 @@ unverified: T3 | <断言>          | 障碍: <具体> | 人工测点 #N
 | R5 | 接管发生在计算线程完成的回调里。 | 一切副作用（扣电、收发材料）经 `level.getServer().execute` 回主线程；计算线程只做判定。 |
 | R6 | 依赖未接入（AE2 / Jade / GTMThings） | 属 Wave 0；未完成前不得宣称「可交付」 |
 | R7 | 按次计费使「一次请求 1000 个」与「请求 1 个」成本相同 | **有意**（开发者 2026-11-10 定稿）；要按量收费改 `chargeMode=PER_UNIT`，不改代码 |
-| R8 | 本机 `https://github.com` 443 不通（20s 超时），SSH 可用 | 远程一律走 `git@github.com:...`；提交前一并核对 `git ls-remote` 有响应 |
+| R8 | 本机 `https://github.com` 443 不通（实测 `Failed to connect after 21068 ms`） | 远程一律走 `git@github.com:...`。认证由 `~\.ssh\config` 统一指向**账号级**密钥 `id_ed25519_wenxing`（覆盖 attributearch / wenxingtools / MatterReassembler）；旧的 `id_ed25519` 是 wenxingtools 的部署密钥（一钥一仓），保留做回退但**不是默认身份**——部署密钥的优先级高于账号密钥，混用会导致「账号已授权却仍 denied」 |
 
 ---
 
