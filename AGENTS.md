@@ -36,7 +36,9 @@
 | 元数据依赖已声明 | `mods.toml` 内 `ae2` mandatory=true（`[15.4.0,16)`）、`jade`/`gtmthings` mandatory=false；已核对产物内取值 |
 | git 仓库**已初始化** | 主分支 `MatterReassembler-Forge-1.20.1`；远程 `origin` 为 SSH（HTTPS 在本机 443 不通，见 R8） |
 | 无测试目录 | 只有 `src/main/`，没有 `src/test/`；T1 探针一律放 `.rivet/scratch/` |
-| 无任何资源文件 | 缺 `blockstates`/`models`/`textures`/`lang`/`recipes`，Wave 1 一次性补齐 |
+| **Wave 1 已落地**（2026-11-10） | 方块 + 方块实体 + `long` 电量池 + 顶面开关 + 全套资源均在产物内；`build` exit=0；T1 探针 27 passed |
+| **T2 尚未通过** | `runServer` 停在 `You need to agree to the EULA`（`run\eula.txt` 需开发者本人确认后才会生成）——mod 已被 FML 识别，但注册/方块加载阶段没跑到 |
+| 贴图为占位美术 | 16×80 五帧动画，由一个一次性脚本生成；正式美术替换时只改 `assets\matterreassembler\textures\block\` 下 4 组 png+mcmeta |
 
 **因此：** 现在「能构建」只等于「骨架能编译」，与本模组功能无关；在依赖接入（Wave 0-2）完成前不得宣称「可交付」，也不得把编译通过当作功能证据。`git init` 已完成，后续提交走正常分支流程。
 

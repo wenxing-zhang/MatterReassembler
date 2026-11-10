@@ -194,6 +194,14 @@ tasks.named('processResources', ProcessResources).configure {
 }
 
 // Example for how to get properties into the manifest for reading at runtime.
+// T1 隔离探针用：把主源码集的编译 classpath 打到标准输出，
+// 便于 `.rivet/scratch/` 里的一次性探针用 javac/java 直接引用真实的 MC / Forge / AE2 类型。
+tasks.register('printCompileClasspath') {
+    doLast {
+        println sourceSets.main.compileClasspath.asPath
+    }
+}
+
 tasks.named('jar', Jar).configure {
     manifest {
         attributes([
