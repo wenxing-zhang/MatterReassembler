@@ -37,7 +37,8 @@
 | git 仓库**已初始化** | 主分支 `MatterReassembler-Forge-1.20.1`；远程 `origin` 为 SSH（HTTPS 在本机 443 不通，见 R8） |
 | 无测试目录 | 只有 `src/main/`，没有 `src/test/`；T1 探针一律放 `.rivet/scratch/` |
 | **Wave 1 已落地**（2026-11-10） | 方块 + 方块实体 + `long` 电量池 + 顶面开关 + 全套资源均在产物内；`build` exit=0；T1 探针 27 passed |
-| **T2 尚未通过** | `runServer` 停在 `You need to agree to the EULA`（`run\eula.txt` 需开发者本人确认后才会生成）——mod 已被 FML 识别，但注册/方块加载阶段没跑到 |
+| **T2 已通过**（启动级） | `runServer` 到 `Done (5.415s)! For help, type "help"`，0 条 ERROR；AE2 mixin 正常注入；配置按默认值生成。**方块尚未入世**（Gradle 的 `runServer` 不转发 stdin，`setblock` 送不进去） |
+| 开发环境两条前置 | `guideme` 必须在依赖里（AE2 硬依赖 `[20.1.7,20.2.0)`）；`mixin.env.remapRefMap=true` + `refMapRemappingFile=build/createSrgToMcp/output.srg` 必须开，否则 AE2 的 SRG 名注入在 official 映射的 dev 环境必然失败 |
 | 贴图为占位美术 | 16×80 五帧动画，由一个一次性脚本生成；正式美术替换时只改 `assets\matterreassembler\textures\block\` 下 4 组 png+mcmeta |
 
 **因此：** 现在「能构建」只等于「骨架能编译」，与本模组功能无关；在依赖接入（Wave 0-2）完成前不得宣称「可交付」，也不得把编译通过当作功能证据。`git init` 已完成，后续提交走正常分支流程。

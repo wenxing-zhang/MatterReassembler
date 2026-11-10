@@ -29,6 +29,44 @@
 
 ---
 
+## 2026-11-10 · T2 打通：补 GuideME 依赖、开启 Mixin refmap 重映射，开发环境服务端可启动
+
+| 项 | 内容 |
+|----|------|
+| 变更类型 | 修正（运行环境打通；玩法面不变） |
+| 涉及范围 | 构建脚本的运行配置与依赖、版本属性 |
+| 是否可回滚 | 是（去掉 `guideme` 依赖与两条 mixin 属性即回退，代价是开发环境服务端起不来） |
+| 已知风险 | 这两条只影响**开发环境**；玩家侧仍需自己装 GuideME（AE2 已在它的元数据里声明硬依赖） |
+
+### 效果
+
+- `runServer` 现在能真正跑完加载：`Done (5.415s)! For help, type "help"`，全程 **0 条 ERROR**。
+- 模组被 FML 正常识别并完成构造：配置文件按预期生成，键与默认值都正确（`chargeMode = "PER_JOB"`、`energyPerJob = 100000`、`exposeDownFace = true` 等）。
+- AE2 自己的 Mixin 也能在开发环境注入了（日志出现 `Mixing EnchantmentHelperMixin from ae2.mixins.json into …`）。
+- 数据包正常解析：没有配方/战利品表解析错误，说明 `matterreassembler:matter_reassembler` 这个物品 id 在注册表里确实存在。
+
+### 实现
+
+- **补 GuideME**：AE2 15.4.10 的元数据声明硬依赖 `guideme [20.1.7,20.2.0)`，此前依赖里没有，服务端在 mod 加载阶段直接被拒（`Missing or unsupported mandatory dependencies`）。改为显式声明 20.1.15（Modrinth 通道）。
+- **开启 Mixin refmap 重映射**：AE2 的注入目标写的是 SRG 名（`m_129815_`），开发环境是 official 名，不重映射就报 `InvalidInjectionException: could not find any targets matching '…m_129815_…'` 并把整个服务端拖死。给所有运行配置加 `mixin.env.remapRefMap=true` 与 `mixin.env.refMapRemappingFile=<build/createSrgToMcp/output.srg>`。
+- EULA：`run\eula.txt` 由开发者本人在明确同意后写入 `eula=true`（此前 T2 就停在这一步）。
+
+### 边界
+
+- 只验证到「服务端启动、注册完成、数据包加载、配置生成」。**方块没有真正放进世界**：Gradle 启动的 `runServer` 不转发 stdin，注入 `setblock` / `data get block` 的命令送不进去，因此「放下方块 → 方块实体创建 → 能量接口可按面读写」仍未实测。
+- 开发环境的两条 mixin 属性不影响发布 jar；玩家侧不需要。
+- AE2 版本仍钉 15.4.10；换版本必须重跑 T2（它的 refmap 目标会随映射变化）。
+
+### 验证
+
+- `verify: T2 | .\gradlew.bat runServer --args="nogui" | 命中: Done (5.415s)! For help, type "help"；ERROR 计数 = 0`
+- `verify: T2 | 同上日志 | 命中: Mixing EnchantmentHelperMixin from ae2.mixins.json into net.minecraft.world.item.enchantment.EnchantmentHelper`
+- `verify: T0 | run\config\matterreassembler-common.toml | 命中: takeover.chargeMode="PER_JOB"、energyPerJob=100000、energyPerUnit=100000、exposeDownFace=true、pollCoverInterval=20（键与默认值和 DESIGN §10 一致）`
+- `verify: T2 | 数据包解析 | 命中: 无 recipe/loot_table 解析错误（间接证明物品 id 已注册）`
+- **未验证**：方块入世与方块实体行为（见上「边界」）。人工测点：① 创造栏取出方块 → 放置成功；② `/data get block <pos>` 看到 `Energy: 0L`、`Enabled: 1b`；③ 外部机器四个侧面注能、顶面抽不到；④ 空手潜行右键顶面翻转 `Enabled`。
+
+---
+
 ## 2026-11-10 · Wave 1：方块、方块实体、电量池、顶面开关与全套资源落地
 
 | 项 | 内容 |
