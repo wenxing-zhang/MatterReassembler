@@ -1,0 +1,17 @@
+{
+  "block.matterreassembler.matter_reassembler": "Matter Reassembler",
+  "block.matterreassembler.matter_reassembler_2": "Matter Reassembler 2",
+  "itemGroup.matterreassembler.main": "Matter Reassembler",
+  "jade.matterreassembler.network": "ME Network: %s",
+  "jade.matterreassembler.online": "Connected",
+  "jade.matterreassembler.offline": "Not connected",
+  "jade.matterreassembler.state": "Status: %s",
+  "jade.matterreassembler.running": "Running",
+  "jade.matterreassembler.disabled": "Disabled",
+  "jade.matterreassembler.energy": "Energy: %s",
+  "jade.matterreassembler.infinite": "Infinite",
+  "jade.matterreassembler.throughput": "Per-call limit: %s",
+  "tooltip.matterreassembler.desc": "Stores and supplies FE; changes how AE crafting orders are fulfilled.",
+  "tooltip.matterreassembler.hint": "Costs 10,000 FE per use; shift + right-click the top face to toggle.",
+  "tooltip.matterreassembler.infinite": "Built-in infinite energy"
+}

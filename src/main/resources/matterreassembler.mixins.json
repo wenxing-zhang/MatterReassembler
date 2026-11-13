@@ -1,0 +1,14 @@
+{
+  "required": true,
+  "minVersion": "0.8.5",
+  "package": "com.wenxing.matterreassembler.mixin",
+  "compatibilityLevel": "JAVA_13",
+  "mixins": [
+    "CraftingServiceMixin"
+  ],
+  "client": [],
+  "server": [],
+  "injectors": {
+    "defaultRequire": 1
+  }
+}

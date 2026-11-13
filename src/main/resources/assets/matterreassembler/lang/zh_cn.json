@@ -1,0 +1,17 @@
+{
+  "block.matterreassembler.matter_reassembler": "物质重组器",
+  "block.matterreassembler.matter_reassembler_2": "物质重组器2",
+  "itemGroup.matterreassembler.main": "物质重组器",
+  "jade.matterreassembler.network": "ME 网络：%s",
+  "jade.matterreassembler.online": "已接入 ME 网络",
+  "jade.matterreassembler.offline": "未接入",
+  "jade.matterreassembler.state": "状态：%s",
+  "jade.matterreassembler.running": "运行中",
+  "jade.matterreassembler.disabled": "已关闭",
+  "jade.matterreassembler.energy": "电量：%s",
+  "jade.matterreassembler.infinite": "无限",
+  "jade.matterreassembler.throughput": "接口单次上限：%s",
+  "tooltip.matterreassembler.desc": "可以存取电量，修改AE下单方式",
+  "tooltip.matterreassembler.hint": "使用消耗1万点FE，shift+右键顶面可开关",
+  "tooltip.matterreassembler.infinite": "自带无限能源"
+}

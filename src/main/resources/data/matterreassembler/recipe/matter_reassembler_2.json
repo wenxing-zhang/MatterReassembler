@@ -1,0 +1,22 @@
+{
+  "neoforge:conditions": [
+    {
+      "type": "neoforge:item_exists",
+      "item": "wenxingtools:custom_spawner"
+    }
+  ],
+  "type": "minecraft:crafting_shapeless",
+  "category": "misc",
+  "ingredients": [
+    {
+      "item": "matterreassembler:matter_reassembler"
+    },
+    {
+      "item": "wenxingtools:custom_spawner"
+    }
+  ],
+  "result": {
+    "id": "matterreassembler:matter_reassembler_2",
+    "count": 1
+  }
+}

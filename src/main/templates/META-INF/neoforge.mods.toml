@@ -1,0 +1,57 @@
+# NeoForge 模组元数据。字段值为构建期由 gradle.properties 展开（META-INF/neoforge.mods.toml 是模板）。
+# 1.21 的加载器只认 META-INF/neoforge.mods.toml；旧路径 META-INF/mods.toml 不再被读取。
+modLoader="javafml" #mandatory
+
+# A version range to match for said mod loader - for regular FML @Mod it will be the FML version.
+loaderVersion="${loader_version_range}" #mandatory
+
+# The license for you mod. This is mandatory metadata.
+license="${mod_license}"
+
+# A list of mods - how many allowed here is determined by the individual mod loader
+[[mods]] #mandatory
+
+modId="${mod_id}" #mandatory
+version="${mod_version}" #mandatory
+displayName="${mod_name}" #mandatory
+
+# A text field displayed in the mod UI
+authors="${mod_authors}" #optional
+
+# The description text for the mod (multi line!) (#mandatory)
+description='''${mod_description}'''
+
+# Mixin 配置：本模组唯一的注入点（CraftingService#submitJob 的 HEAD 短路）声明在
+# matterreassembler.mixins.json。注入失败会在启动期以 MixinApplyError 暴露（AGENTS §4 强制门）。
+[[mixins]]
+config="${mod_id}.mixins.json"
+
+# ---- 硬依赖：AE2（合成旁路的接入点、网格节点基类与存储接口都在它里面）----
+[[dependencies.${mod_id}]]
+    modId="neoforge"
+    type="required"
+    versionRange="[${neo_version},)"
+    ordering="NONE"
+    side="BOTH"
+
+[[dependencies.${mod_id}]]
+    modId="minecraft"
+    type="required"
+    versionRange="${minecraft_version_range}"
+    ordering="NONE"
+    side="BOTH"
+
+[[dependencies.${mod_id}]]
+    modId="ae2"
+    type="required"
+    versionRange="${ae2_version_range}"
+    ordering="AFTER"
+    side="BOTH"
+
+# ---- 软依赖：Jade（信息显示；缺失时静默降级，不影响加载）----
+[[dependencies.${mod_id}]]
+    modId="jade"
+    type="optional"
+    versionRange="${jade_version_range}"
+    ordering="AFTER"
+    side="BOTH"
