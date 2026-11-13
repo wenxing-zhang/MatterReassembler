@@ -119,6 +119,12 @@ public class MatterReassemblerBlockEntity extends AENetworkedBlockEntity {
      * 用网格成员数兜底：孤立节点只有它自己（size == 1），真正接入网络时必然还有线缆或别的机器的节点。
      */
     public boolean isOnline() {
+        // 关闭 = 视为「已退出 ME 网络」：外观与 Jade 都回到未接入。
+        // 注意这只是**逻辑断开**：节点仍挂在网上、线缆也不会脱落，
+        // 这样重新打开时不需要玩家重新接线（2026-11-14 裁定）。
+        if (!enabled) {
+            return false;
+        }
         var node = getMainNode();
         if (!node.isActive()) {
             return false;
@@ -252,6 +258,7 @@ public class MatterReassemblerBlockEntity extends AENetworkedBlockEntity {
                 return 0;
             }
             if (infiniteEnergy) {
+                logFlow("接收", maxReceive, maxReceive, simulate);
                 return maxReceive;
             }
             long accepted = EnergyMath.accept(energy, maxReceive);
@@ -259,6 +266,7 @@ public class MatterReassemblerBlockEntity extends AENetworkedBlockEntity {
                 energy += accepted;
                 setChanged();
             }
+            logFlow("接收", maxReceive, accepted, simulate);
             return (int) accepted; // accepted ≤ maxReceive ≤ Integer.MAX_VALUE，转换安全
         }
 
@@ -268,6 +276,7 @@ public class MatterReassemblerBlockEntity extends AENetworkedBlockEntity {
                 return 0;
             }
             if (infiniteEnergy) {
+                logFlow("抽取", maxExtract, maxExtract, simulate);
                 return maxExtract;
             }
             long extracted = EnergyMath.extract(energy, maxExtract);
@@ -275,7 +284,27 @@ public class MatterReassemblerBlockEntity extends AENetworkedBlockEntity {
                 energy -= extracted;
                 setChanged();
             }
+            logFlow("抽取", maxExtract, extracted, simulate);
             return (int) extracted;
+        }
+
+        /**
+         * 能量搬运诊断：只在**真正发生传输**（非模拟且量 &gt; 0）且 {@code debugLogging} 开启时输出一行。
+         *
+         * <p>用途：外部管道「抽不出电」这类问题，靠读代码无法区分「对方没拿到能量接口」与
+         * 「拿到了但返回 0」。打开 {@code debugLogging} 后如果没有这一行，说明对方**根本没调**
+         * 这两个方法；有这一行但数值为 0，说明调用到了我们这里（2026-11-14 为 Pipez 排查而加）。
+         * 只在真实传输时输出，不会在模拟（每 tick 多次）路径上刷屏。
+         */
+        private void logFlow(String kind, int requested, long actual, boolean simulate) {
+            if (simulate || actual <= 0L) {
+                return;
+            }
+            if (!MatterReassemblerConfig.COMMON.debugLogging.get()) {
+                return;
+            }
+            MatterReassembler.LOGGER.debug("[energy] 物质重组器 {} {} {} FE（请求 {}，无限={}）",
+                    worldPosition, kind, actual, requested, infiniteEnergy);
         }
 
         @Override
