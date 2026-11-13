@@ -1,0 +1,6 @@
+{
+  "parent": "minecraft:block/cube_all",
+  "textures": {
+    "all": "matterreassembler:block/matter_reassembler_pink_off"
+  }
+}

@@ -70,18 +70,37 @@ public final class TakeoverService {
                 .thenComparingLong(be -> be.getBlockPos().asLong()));
 
         GenericStack finalOutput = plan.finalOutput();
-        long outputAmount = finalOutput != null ? finalOutput.amount() : 0L;
-        int amountPerUnit = finalOutput != null ? finalOutput.what().getAmountPerUnit() : 1;
-        long cost = TakeoverCost.totalCost(cfg.chargeMode.get(), cfg.energyPerJob.get(),
-                cfg.energyPerUnit.get(), outputAmount, amountPerUnit);
 
+        // 材料先聚合：产出量的净额计算需要它（最终产物是否也被中间步骤消耗）。
         Map<AEKey, Long> materials = new LinkedHashMap<>();
         for (var entry : plan.usedItems()) {
             materials.merge(entry.getKey(), entry.getValue(), Long::sum);
         }
+
+        // 按样板累加「实际会产出多少」，而不是直接用 finalOutput().amount()。
+        // 那个字段是**玩家请求量**：请求 1 个铁粉、配方一次出 4 个时它给的是 1，
+        // 照它投放会让旁路比走 CPU 少给东西（2026-11-14 实机：1 个 vs 4 个）。
+        Map<AEKey, Long> producedByPattern = new LinkedHashMap<>();
+        for (var entry : plan.patternTimes().entrySet()) {
+            long times = entry.getValue();
+            if (times <= 0L) {
+                continue;
+            }
+            for (GenericStack out : entry.getKey().getOutputs()) {
+                long perRuns = TakeoverCost.saturatingMultiply(out.amount(), times);
+                producedByPattern.merge(out.what(), perRuns, TakeoverCost::saturatingAdd);
+            }
+        }
+        long outputAmount = finalOutput == null ? 0L
+                : TakeoverCost.actualOutput(producedByPattern, finalOutput.what(),
+                        finalOutput.amount(), materials.getOrDefault(finalOutput.what(), 0L));
+        int amountPerUnit = finalOutput != null ? finalOutput.what().getAmountPerUnit() : 1;
+        long cost = TakeoverCost.totalCost(cfg.chargeMode.get(), cfg.energyPerJob.get(),
+                cfg.energyPerUnit.get(), outputAmount, amountPerUnit);
+
         Map<AEKey, Long> outputs = new LinkedHashMap<>();
-        if (finalOutput != null) {
-            outputs.merge(finalOutput.what(), finalOutput.amount(), Long::sum);
+        if (finalOutput != null && outputAmount > 0L) {
+            outputs.merge(finalOutput.what(), outputAmount, Long::sum);
         }
         // 边界 B7：emittedItems（容器物 / 副产物）必须原样入网，否则容器类配方会吞桶吞瓶。
         for (var entry : plan.emittedItems()) {

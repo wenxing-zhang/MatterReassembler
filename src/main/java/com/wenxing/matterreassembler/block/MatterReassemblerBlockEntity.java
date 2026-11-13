@@ -99,12 +99,32 @@ public class MatterReassemblerBlockEntity extends AENetworkedBlockEntity {
         if (level.getGameTime() % ONLINE_RECHECK_INTERVAL != 0L) {
             return;
         }
-        boolean active = getMainNode().isActive();
+        boolean active = isOnline();
         BlockState state = getBlockState();
         // 外观由方块状态驱动：属性一变，客户端与渲染自动跟上，不用发自定义包。
         if (state.hasProperty(MatterReassemblerBlock.ONLINE) && state.getValue(MatterReassemblerBlock.ONLINE) != active) {
             level.setBlock(worldPosition, state.setValue(MatterReassemblerBlock.ONLINE, active), Block.UPDATE_CLIENTS);
         }
+    }
+
+    // ------------------------------------------------------------------
+    // 在线判定
+    // ------------------------------------------------------------------
+
+    /**
+     * 是否「真的接入了 ME 网络」。
+     *
+     * <p>不能只看 {@code getMainNode().isActive()}：本方块零闲置功耗、不要求频道，孤立时自己也能
+     * 构成一个「可用」的网格，于是拔掉线缆后它依然报 active（2026-11-14 实机：断开线缆 Jade 仍显示已接入）。
+     * 用网格成员数兜底：孤立节点只有它自己（size == 1），真正接入网络时必然还有线缆或别的机器的节点。
+     */
+    public boolean isOnline() {
+        var node = getMainNode();
+        if (!node.isActive()) {
+            return false;
+        }
+        var grid = node.getGrid();
+        return grid != null && grid.size() > 1;
     }
 
     // ------------------------------------------------------------------

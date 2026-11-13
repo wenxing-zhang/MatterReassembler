@@ -48,6 +48,43 @@ public final class TakeoverCost {
         return unitCost * units;
     }
 
+    /** 饱和加法：溢出时停在 {@link Long#MAX_VALUE}，绝不回绕成负数。 */
+    public static long saturatingAdd(long a, long b) {
+        if (a <= 0L) {
+            return Math.max(0L, b);
+        }
+        if (b <= 0L) {
+            return a;
+        }
+        if (a > Long.MAX_VALUE - b) {
+            return Long.MAX_VALUE;
+        }
+        return a + b;
+    }
+
+    /**
+     * 计划里最终产物的<b>实际投放量</b>。
+     *
+     * <p>为什么不能直接用 {@code plan.finalOutput().amount()}：那个字段是「玩家请求了多少」，
+     * 不是「样板跑完会产出多少」。配方一次出 4 个而玩家只请求 1 个时，CPU 执行一次样板会产出
+     * 4 个、全部入网；旁路若照请求量投放，玩家就只能拿到 1 个（2026-11-14 实测：1 个 vs 4 个）。
+     *
+     * @param producedByPattern 各样板「每次产出 × 执行次数」按物品聚合后的总量
+     * @param key               最终产物的键
+     * @param requested         玩家请求量（样板信息缺失时的回退值）
+     * @param consumed          该键在 {@code usedItems} 里被当作材料消耗掉的数量（中间产物场景）
+     */
+    public static <K> long actualOutput(java.util.Map<K, Long> producedByPattern, K key,
+                                        long requested, long consumed) {
+        long produced = producedByPattern == null ? 0L : producedByPattern.getOrDefault(key, 0L);
+        if (produced <= 0L) {
+            // 拿不到样板明细时退回请求量：宁可少给，也不能凭空生成。
+            return Math.max(0L, requested);
+        }
+        long net = produced - Math.max(0L, consumed);
+        return Math.max(0L, net);
+    }
+
     /** 本次接管的总 FE 成本。所有输入都来自配置与计划，不做任何世界访问。 */
     public static long totalCost(ChargeMode mode, long energyPerJob, long energyPerUnit,
                                  long amount, int amountPerUnit) {

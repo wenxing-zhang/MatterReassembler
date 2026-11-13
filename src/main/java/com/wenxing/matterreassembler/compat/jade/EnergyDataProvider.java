@@ -40,7 +40,7 @@ public final class EnergyDataProvider implements IServerDataProvider<BlockAccess
         // 服务端快照，客户端只负责格式化——数字不在客户端重新计算（DESIGN §9.3）。
         data.putLong(KEY_ENERGY, reassembler.getStoredEnergy());
         data.putBoolean(KEY_ENABLED, reassembler.isEnabled());
-        data.putBoolean(KEY_ONLINE, reassembler.getMainNode().isActive());
+        data.putBoolean(KEY_ONLINE, reassembler.isOnline());
         // 单次能量交互上限是 int 的硬约束（接口签名决定），不是配置项。
         data.putInt(KEY_THROUGHPUT, Integer.MAX_VALUE);
         // 无限能源（二代机）：客户端据此显示「无限」而不是一串天文数字。
