@@ -122,18 +122,23 @@ public final class MatterReassembler {
             // 必须带泛型参数强转而不能用 raw type：raw 调用会把 BlockEntityTicker<T> 擦成
             // BlockEntityTicker<BlockEntity>，参数位退化成 BlockEntity，
             // 于是 MatterReassemblerBlockEntity::serverTick 不再兼容（1.20.1 端实测编译报错）。
+            //
+            // 参数顺序是坑：签名看着像 (class, type, server, client)，实际是 (class, type, **client**, **server**)。
+            // AE2 字节码里 serverTicker 取第 4 个参数、clientTicker 取第 3 个（1.20.1 的 15.4.10 与
+            // 1.21.1 的 19.2.19 逐字节一致）。把 server ticker 传到第 3 位不会报错，只会让服务端
+            // ticker 变成 null —— 方块外观永不刷新（Jade 仍显示已接入，因为那是直接查节点状态）。
             ((MatterReassemblerBlock<MatterReassemblerBlockEntity>) MATTER_REASSEMBLER.get()).setBlockEntity(
                     MatterReassemblerBlockEntity.class,
                     MATTER_REASSEMBLER_BE.get(),
-                    MatterReassemblerBlockEntity::serverTick,
-                    null);
+                    null,
+                    MatterReassemblerBlockEntity::serverTick);
             // 二代机：方块实体自带无限能源。ticker 直接复用父类实现——
             // BlockEntityTicker<T> 的参数位是 T，方法引用接受父类型即可（参数逆变）。
             ((MatterReassemblerBlock<InfiniteMatterReassemblerBlockEntity>) MATTER_REASSEMBLER_2.get()).setBlockEntity(
                     InfiniteMatterReassemblerBlockEntity.class,
                     MATTER_REASSEMBLER_2_BE.get(),
-                    MatterReassemblerBlockEntity::serverTick,
-                    null);
+                    null,
+                    MatterReassemblerBlockEntity::serverTick);
         });
     }
 

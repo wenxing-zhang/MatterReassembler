@@ -250,6 +250,7 @@ flowchart TD
 | 物品 tooltip | `appendHoverText(ItemStack, Level, List, TooltipFlag)` | `appendHoverText(ItemStack, Item.TooltipContext, List, TooltipFlag)` |
 | 创造栏排序 | `withTabsBefore(ResourceKey…)` | 同（`CreativeModeTabs.REDSTONE_BLOCKS` 仍是 `ResourceKey`） |
 | 方块实体工厂 | `BlockEntityType.Builder.of(supplier, blocks).build(null)` | 同 |
+| 方块实体 ticker 接线 | `setBlockEntity(class, type, serverTicker, clientTicker)`（看着像服务端在前） | 同签名，但**实际语义是 `(class, type, clientTicker, serverTicker)`**——第 3 位是客户端。传反不报错，只会让服务端 ticker 变 null（两版字节码逐字一致） |
 | 配置 `defineInRange` | `defineInRange(key, long, min, max)` → `LongValue` | 同签名仍在；另有泛型版 `defineInRange(key, V, V, V, Class<V>)` → `ConfigValue<V>` |
 | 数据目录 | `recipes/`、`loot_tables/` | **`recipe/`、`loot_table/`**（单数，复数路径不被读取） |
 | 配方 result | `{"item": "...", "count": 1}` | `{"id": "...", "count": 1}` |

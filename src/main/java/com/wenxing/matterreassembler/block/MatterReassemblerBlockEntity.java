@@ -262,7 +262,12 @@ public class MatterReassemblerBlockEntity extends AENetworkedBlockEntity {
         public int getEnergyStored() {
             // 对外永远是 int：内部可能远超 21 亿，钳制而非截断（截断会显示成负数）。
             if (infiniteEnergy) {
-                return Integer.MAX_VALUE;
+                // 刻意**不返回** Integer.MAX_VALUE：多数物流模组算「可抽额度」用的是
+                // capacity - stored，报满会让它们认定无从抽取，于是二代机的电一根都抽不出来
+                // （2026-11-14 实测的「管道抽不出电」就是这个形状）。取一半，
+                // 既保留「电非常多」的语义，又让任何 pull 型管道都算得出可抽额度。
+                // 注意：Jade 与成本判定读的是内部 getStoredEnergy()，不受这里影响。
+                return Integer.MAX_VALUE / 2;
             }
             return EnergyMath.toIntClamped(energy);
         }
