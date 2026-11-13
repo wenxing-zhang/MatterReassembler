@@ -200,6 +200,7 @@ unverified: T3 | <断言>          | 障碍: <具体> | 人工测点 #N
 | 方块实体基类 | AE2 的**网格连接**基类 `AENetworkedBlockEntity` | 自造 `BlockEntity` 再手搓网格节点 |
 | 内部库存 | 本方块**没有**物品栏，所以用无库存基类 | 误用 `AENetworkedInvBlockEntity`（会逼你实现两个空壳方法） |
 | 网格节点 | `IManagedGridNode`（基类 `createMainNode()` 里构建） | 直接 `IGridNode` 手工生命周期 |
+| 网格接入 | 注册期显式声明 `AECapabilities.IN_WORLD_GRID_NODE_HOST`（provider 返回方块实体自身，两个方块实体类型各一次） | 只实现 `IGridConnectedBlockEntity` 就以为线缆能连——19.x 不会自动发现，且**不报错**（2026-11-14 实机踩过） |
 | 电量存储 | 自有 `long` 池 + `IEnergyStorage` 适配（`int` 钳制） | 用 `EnergyStorage`（内部 `int`，必溢出） |
 | 能量 capability | `RegisterCapabilitiesEvent#registerBlockEntity` + `Capabilities.EnergyStorage.BLOCK` | 覆写 `BlockEntity#getCapability`（1.21 已无此入口） |
 | 方块交互 | `useWithoutItem`（空手）/ `useItemOn`（手持） | `onActivated`（AE2 15.x 的旧钩子，19.x 已移除） |

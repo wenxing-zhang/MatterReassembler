@@ -242,6 +242,7 @@ flowchart TD
 | 方块注册 | `DeferredRegister<Block>.register` | `DeferredRegister.Blocks#registerBlock(name, ctor, props)`（注册方补 `setId`） |
 | 配置 | `ForgeConfigSpec` + `ModLoadingContext.get().registerConfig` | `ModConfigSpec` + `ModContainer#registerConfig` |
 | 能量能力 | 方块实体覆写 `getCapability` + `ForgeCapabilities.ENERGY` + `LazyOptional` | `RegisterCapabilitiesEvent#registerBlockEntity` + `Capabilities.EnergyStorage.BLOCK` |
+| AE2 网格接入 | 方块实现网格接口即可，Forge 的能力桥接自动把方块实体暴露给线缆 | **必须显式注册 `AECapabilities.IN_WORLD_GRID_NODE_HOST`**（provider 返回方块实体自身）；漏注册不报错，线缆静默看不见该方块 |
 | AE2 网格基类 | `AENetworkInvBlockEntity` | **`AENetworkedBlockEntity`**（无库存）/ `AENetworkedInvBlockEntity`（有库存）——旧类已删除 |
 | 方块交互 | `AEBaseBlock#onActivated(Level, BlockPos, Player, InteractionHand, ItemStack, BlockHitResult)` | **`useWithoutItem(BlockState, Level, BlockPos, Player, BlockHitResult)`** / `useItemOn(...)` |
 | NBT 持久化 | `loadTag(CompoundTag)` / `saveAdditional(CompoundTag)` | `loadTag(CompoundTag, HolderLookup.Provider)` / `saveAdditional(CompoundTag, Provider)` |

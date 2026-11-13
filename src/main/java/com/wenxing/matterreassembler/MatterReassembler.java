@@ -1,5 +1,6 @@
 package com.wenxing.matterreassembler;
 
+import appeng.api.AECapabilities;
 import com.mojang.logging.LogUtils;
 import com.wenxing.matterreassembler.block.InfiniteMatterReassemblerBlock;
 import com.wenxing.matterreassembler.block.InfiniteMatterReassemblerBlockEntity;
@@ -145,5 +146,15 @@ public final class MatterReassembler {
                 (be, side) -> be.energyStorageFor(side));
         event.registerBlockEntity(Capabilities.EnergyStorage.BLOCK, MATTER_REASSEMBLER_2_BE.get(),
                 (be, side) -> be.energyStorageFor(side));
+
+        // AE2 19.x 靠这个 capability 发现「相邻方块是个网格节点宿主」。
+        // 1.20.1 那边由 Forge 的 getCapability 桥接自动完成，19.x 改成注册期显式声明，
+        // 第三方方块必须自己注册——漏掉的后果不是报错，而是**线缆根本看不见这个方块**：
+        // 方块实体能建节点、Jade 也显示「已接入」，但线缆不会把它接进网络（2026-11-14 实机复现）。
+        // provider 直接返回方块实体本身：IGridConnectedBlockEntity 继承自 IInWorldGridNodeHost。
+        event.registerBlockEntity(AECapabilities.IN_WORLD_GRID_NODE_HOST, MATTER_REASSEMBLER_BE.get(),
+                (be, context) -> be);
+        event.registerBlockEntity(AECapabilities.IN_WORLD_GRID_NODE_HOST, MATTER_REASSEMBLER_2_BE.get(),
+                (be, context) -> be);
     }
 }
