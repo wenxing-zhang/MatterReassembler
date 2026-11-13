@@ -1,13 +1,13 @@
 {
   "variants": {
     "enabled=true,online=true": {
-      "model": "matterreassembler:block/matter_reassembler_pink"
+      "model": "matterreassembler:block/matter_reassembler_white_online"
     },
     "enabled=true,online=false": {
       "model": "matterreassembler:block/matter_reassembler_white"
     },
     "enabled=false,online=true": {
-      "model": "matterreassembler:block/matter_reassembler_pink_off"
+      "model": "matterreassembler:block/matter_reassembler_white_off"
     },
     "enabled=false,online=false": {
       "model": "matterreassembler:block/matter_reassembler_white_off"

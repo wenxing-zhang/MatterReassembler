@@ -1,5 +1,6 @@
 package com.wenxing.matterreassembler.block;
 
+import appeng.api.networking.GridFlags;
 import appeng.blockentity.grid.AENetworkedBlockEntity;
 import com.wenxing.matterreassembler.MatterReassembler;
 import com.wenxing.matterreassembler.config.MatterReassemblerConfig;
@@ -72,8 +73,12 @@ public class MatterReassemblerBlockEntity extends AENetworkedBlockEntity {
                                            boolean infiniteEnergy) {
         super(type, pos, state);
         this.infiniteEnergy = infiniteEnergy;
-        // 不占频道、不吃 AE 电量：它只是挂在网上读「是否在线」，不是用电器。
-        getMainNode().setIdlePowerUsage(0.0);
+        // 必须占一个频道：只有真正从网络拿到频道的节点才算「已接入 ME 网络」。
+        // 不占频道的节点会自己构成一个「可用」网格，于是接一根线缆（甚至没有频道）就显示已连接
+        // （2026-11-14 实机）。闲置功耗仍为 0：本方块不用电，只靠频道确认自己在网络里。
+        getMainNode()
+                .setIdlePowerUsage(0.0)
+                .setFlags(GridFlags.REQUIRE_CHANNEL);
     }
 
     /**

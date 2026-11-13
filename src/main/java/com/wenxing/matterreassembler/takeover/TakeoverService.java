@@ -9,6 +9,7 @@ import appeng.api.stacks.AEKey;
 import appeng.api.stacks.GenericStack;
 import appeng.api.storage.MEStorage;
 import com.wenxing.matterreassembler.MatterReassembler;
+import com.wenxing.matterreassembler.block.InfiniteMatterReassemblerBlockEntity;
 import com.wenxing.matterreassembler.block.MatterReassemblerBlockEntity;
 import com.wenxing.matterreassembler.config.MatterReassemblerConfig;
 import net.minecraft.world.level.Level;
@@ -16,6 +17,7 @@ import net.minecraft.world.level.Level;
 import java.util.ArrayList;
 import java.util.Comparator;
 import java.util.LinkedHashMap;
+import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
@@ -57,7 +59,12 @@ public final class TakeoverService {
 
         // 先取网格里所有本模组方块（不过滤），再筛合格项——
         // 出问题时「一台都没有」和「有但都不合格」是两种完全不同的故障，日志必须能区分。
-        Set<MatterReassemblerBlockEntity> allMachines = grid.getMachines(MatterReassemblerBlockEntity.class);
+        // 必须**分开按精确类**查询再合并：AE2 的网格按「类对象」做 SetMultimap 索引，
+        // getMachines(某类) 只返回注册时 key 恰好等于该类的节点，之后的 isInstance 只过滤已取出的一批。
+        // 因此查父类拿不到子类实例——二代机（子类）会被判成「网格里一台都没有」（2026-11-14 实机）。
+        Set<MatterReassemblerBlockEntity> allMachines = new LinkedHashSet<>();
+        allMachines.addAll(grid.getMachines(MatterReassemblerBlockEntity.class));
+        allMachines.addAll(grid.getMachines(InfiniteMatterReassemblerBlockEntity.class));
         List<MatterReassemblerBlockEntity> eligible = collectEligible(allMachines);
         if (!eligible.isEmpty() && !isServerThread(eligible.get(0))) {
             // 埋点断言：本路径被设计为只在服务端线程运行。真走到这里说明 AE2 的调用线程语义变了，
